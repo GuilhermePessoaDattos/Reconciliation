@@ -1,0 +1,29 @@
+name: Python Application
+
+on:
+  push:
+    branches:
+      - main  # Executa quando houver push na branch principal
+  schedule:
+    - cron: "0 0 * * *"  # Opcional: define uma execução agendada (neste caso, diariamente à meia-noite UTC)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run Script
+        run: |
+          python seu_script.py  # Substitua "seu_script.py" pelo nome do seu script
