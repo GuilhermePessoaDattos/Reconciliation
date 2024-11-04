@@ -238,35 +238,47 @@ api_key = os.getenv('OPENAI_API_KEY')
 uploaded_file_a = st.file_uploader("Envie o arquivo do dataset A", type=["csv", "xlsx"])
 uploaded_file_b = st.file_uploader("Envie o arquivo do dataset B", type=["csv", "xlsx"])
 
+# Verificar se os arquivos e a chave da API foram carregados
 if uploaded_file_a and uploaded_file_b and api_key:
-    # Carregar datasets
-    data_a = pd.read_csv(uploaded_file_a) if uploaded_file_a.name.endswith('.csv') else pd.read_excel(uploaded_file_a)
-    data_b = pd.read_csv(uploaded_file_b) if uploaded_file_b.name.endswith('.csv') else pd.read_excel(uploaded_file_b)
+    # Adiciona mensagens para verificar se os arquivos foram carregados corretamente
+    try:
+        # Carregar datasets
+        st.write("Carregando o Dataset A...")
+        data_a = pd.read_csv(uploaded_file_a) if uploaded_file_a.name.endswith('.csv') else pd.read_excel(uploaded_file_a)
+        st.write("Dataset A carregado com sucesso!")
+        
+        st.write("Carregando o Dataset B...")
+        data_b = pd.read_csv(uploaded_file_b) if uploaded_file_b.name.endswith('.csv') else pd.read_excel(uploaded_file_b)
+        st.write("Dataset B carregado com sucesso!")
+        
+        # Exibir os datasets carregados
+        st.write("**Dataset A:**")
+        st.dataframe(data_a)
+        st.write("**Dataset B:**")
+        st.dataframe(data_b)
 
-    # Exibir os datasets
-    st.write("Dataset A:")
-    st.dataframe(data_a)
-    st.write("Dataset B:")
-    st.dataframe(data_b)
+        # Botão para iniciar o processamento
+        if st.button("Iniciar processamento"):
+            # Identificação de origem usando GPT
+            st.write("Analisando as origens dos datasets...")
+            origin_a = suggest_origin(data_a, "Dataset A", api_key)
+            origin_b = suggest_origin(data_b, "Dataset B", api_key)
 
+            st.write("**Origem do Dataset A:**")
+            st.write(origin_a)
+            st.write("**Origem do Dataset B:**")
+            st.write(origin_b)
 
+            # Sugestão de regras de batimento via GPT
+            st.write("Analisando os datasets e sugerindo regras de batimento via GPT...")
+            match_rules_code = suggest_match_rules(data_a, data_b, api_key)
+            st.write("**Código sugerido pelo GPT para regras de batimento:**")
+            st.code(match_rules_code)
 
-    # Botão para iniciar o processamento
-    if st.button("Iniciar processamento"):
-        # Identificação de origem usando GPT
-        st.write("Analisando as origens dos datasets...")
-        origin_a = suggest_origin(data_a, "Dataset A", api_key)
-        origin_b = suggest_origin(data_b, "Dataset B", api_key)
-
-        st.write("Origem do Dataset A:")
-        st.write(origin_a)
-        st.write("Origem do Dataset B:")
-        st.write(origin_b)
-    
-        st.write("Analisando os datasets e sugerindo regras de batimento via GPT...")
-        match_rules_code = suggest_match_rules(data_a, data_b, api_key)
-        st.write("Código sugerido pelo GPT para regras de batimento:")
-        st.write(match_rules_code)
+    except Exception as e:
+        st.write(f"Ocorreu um erro ao carregar ou exibir os arquivos: {e}")
+else:
+    st.write("Por favor, carregue os dois arquivos e insira a chave da API para iniciar o processamento.")
 
         # Executar as regras de batimento e exibir as métricas finais
         #execute_matching_rules(data_a, data_b, match_rules_code)     
